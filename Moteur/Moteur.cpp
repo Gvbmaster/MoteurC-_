@@ -1,6 +1,8 @@
 // Moteur.cpp : Définit le point d'entrée de l'application.
 //
 
+#include "../Common/d3dUtil.h"
+
 #include "framework.h"
 #include "Moteur.h"
 
