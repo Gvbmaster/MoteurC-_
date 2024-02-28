@@ -1,19 +1,19 @@
-#pragma once
-
-class MyClass
-{
-public:
-	MyClass();
-	~MyClass();
-
-private:
-
-};
-
-MyClass::MyClass()
-{
-}
-
-MyClass::~MyClass()
-{
-}
+//#pragma once
+//
+//class MyClass
+//{
+//public:
+//	MyClass();
+//	~MyClass();
+//
+//private:
+//
+//};
+//
+//MyClass::MyClass()
+//{
+//}
+//
+//MyClass::~MyClass()
+//{
+//}

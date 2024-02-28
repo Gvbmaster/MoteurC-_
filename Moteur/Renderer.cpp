@@ -1,9 +1,9 @@
-#include "Renderer.h"
-
-Renderer::Renderer() {
-
-}
-
-Renderer::~Renderer() {
-
-}
+//#include "Renderer.h"
+//
+//Renderer::Renderer() {
+//
+//}
+//
+//Renderer::~Renderer() {
+//
+//}
