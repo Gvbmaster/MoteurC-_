@@ -7,5 +7,4 @@ class Moteur
 	~Moteur();
 	void init();
 	void run();
-
 };
