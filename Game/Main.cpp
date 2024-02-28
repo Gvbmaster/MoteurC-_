@@ -1,36 +1,44 @@
 #include "../Moteur/Window.h"
 #include "../Moteur/DX12Initializer.h"
-
-#define MAX_LOADSTRING 100
-// Variables globales :
-HINSTANCE hInst;                                // instance actuelle
-WCHAR szTitle[MAX_LOADSTRING];                  // Texte de la barre de titre
-WCHAR szWindowClass[MAX_LOADSTRING];            // nom de la classe de fenêtre principale
+#include "../Moteur/Camera.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
     _In_ LPWSTR    lpCmdLine,
     _In_ int       nCmdShow)
 {
-    // Initialisation de la fenêtre
     Window window;
     window.init();
-
-    // Obtenez le handle de la fenêtre
     HWND hwnd = window.gethwnd();
 
-    // Initialisation de DirectX 12
     DX12Initializer dxInitializer(hwnd);
     HRESULT hr = dxInitializer.Initialize();
     if (FAILED(hr)) {
         return -1;
     }
 
+    Camera camera;
+    camera.setViewMatrix();
+    camera.setProjectionMatrix();
+
     MSG msg;
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while (true)
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        camera.update(/* delta time */);
+
+        // Gestion des messages de la fenêtre
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT)
+                break;
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        else
+        {
+            // Mise à jour de la logique du jeu
+            // Rendu de la scène
+        }
     }
 
     return (int)msg.wParam;
