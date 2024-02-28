@@ -1,6 +1,52 @@
+#include "../Moteur/Transform.h"
+#include <iostream>
+int main(){
+    Transform transform;
+    transform.Identity();
+    transform.Upscale(2, 1, 3);
+    std::cout << transform.matrix._11 << " " << transform.matrix._12 << " " << transform.matrix._13 << " " << transform.matrix._14 << "\n";
+    std::cout << transform.matrix._21 << " " << transform.matrix._22 << " " << transform.matrix._23 << " " << transform.matrix._24 << "\n";
+    std::cout << transform.matrix._31 << " " << transform.matrix._32 << " " << transform.matrix._33 << " " << transform.matrix._34 << "\n";
+    std::cout << transform.matrix._41 << " " << transform.matrix._42 << " " << transform.matrix._43 << " " << transform.matrix._44 << "\n";
+    return 0;
+}
 
 
-#include "../Common/d3dApp.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*#include "../Common/d3dApp.h"
 #include "../Common/MathHelper.h"
 #include "../Common/UploadBuffer.h"
 
@@ -453,4 +499,4 @@ void BoxApp::BuildPSO()
     psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
     psoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
-}
+}*/

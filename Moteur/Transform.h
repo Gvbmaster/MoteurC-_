@@ -6,6 +6,9 @@
 
 using namespace DirectX;
 struct Transform {
+	XMFLOAT3 vPos;
+	XMFLOAT4X4 mPos;
+
 	XMFLOAT3 vSca;
 	XMFLOAT4X4 mSca;
 
@@ -16,6 +19,13 @@ struct Transform {
 	XMFLOAT4X4 mRot;
 
 	XMFLOAT4X4 matrix;
+
+
 	void Identity();
+
+	void Translate(float front, float right, float up);
+	void Upscale(float width, float depth, float height);
 	void Rotate(float yaw, float pitch, float roll);
+
+	void UpdateMatrix();
 };
