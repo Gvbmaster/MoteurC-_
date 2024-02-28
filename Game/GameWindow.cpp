@@ -1,4 +1,4 @@
-#include "../Moteur/Windows.h"
+#include "../Moteur/Window.h"
 
 #define MAX_LOADSTRING 100
 // Variables globales :
@@ -13,12 +13,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 
 
-    Windows windows;
-    windows.init();
+    Window window;
+    window.init();
     
     //Moteur moteur;
     //moteur.Init();
     //moteur.Run();
-    //return 0;
 
+    MSG msg;
+
+    // Boucle de messages principale :
+    while (GetMessage(&msg, nullptr, 0, 0))
+    {
+       TranslateMessage(&msg);
+       DispatchMessage(&msg);
+    }
+
+    return (int)msg.wParam;
+
+    // return 0;
 }
