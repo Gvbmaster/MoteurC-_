@@ -70,3 +70,8 @@ LRESULT Window::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     return 0;
 }
+
+HWND Window::gethwnd()
+{
+	return m_hWnd;
+}
