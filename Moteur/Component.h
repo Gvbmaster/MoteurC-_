@@ -1,7 +1,7 @@
 #pragma once
-#include "../Common/d3dUtil.h"
-#include "GameObject.h"
-#include "Renderer.h"
+//#include "../Common/d3dUtil.h"
+//#include "GameObject.h"
+//#include "Renderer.h"
 #include "Transform.h"
 
 enum class ComponentType {
