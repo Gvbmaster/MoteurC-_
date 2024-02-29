@@ -29,6 +29,7 @@ void Transform::Translate(float front, float right, float up) {
 	
 }
 
+//Make Upscale from a ratio
 void Transform::Upscale(float width, float depth, float height) {
 	vSca = { width, depth, height };
 	XMVECTOR v_vSca = XMLoadFloat3(&vSca);
@@ -38,7 +39,7 @@ void Transform::Upscale(float width, float depth, float height) {
 	UpdateMatrix();
 }
 
-
+//Make rotate from yaw, pitch and roll in radians
 void Transform::Rotate(float yaw, float pitch, float roll) {
 	XMMATRIX m_mRot = XMLoadFloat4x4(&mRot);
 	m_mRot *= XMMatrixRotationRollPitchYaw(pitch,yaw,roll);
@@ -49,5 +50,16 @@ void Transform::Rotate(float yaw, float pitch, float roll) {
 
 void Transform::UpdateMatrix() {
 	XMMATRIX m_matrix = XMLoadFloat4x4(&mSca);
+	XMMATRIX m_mPos = XMLoadFloat4x4(&mPos);
+	XMMATRIX m_mRot = XMLoadFloat4x4(&mRot);
+	m_matrix = m_matrix * m_mPos * m_mRot;
 	XMStoreFloat4x4(&matrix, m_matrix);
+}
+
+
+void Transform::DisplayConsole() {
+	std::cout << matrix._11 << " " << matrix._12 << " " << matrix._13 << " " << matrix._14 << "\n";
+	std::cout << matrix._21 << " " << matrix._22 << " " << matrix._23 << " " << matrix._24 << "\n";
+	std::cout << matrix._31 << " " << matrix._32 << " " << matrix._33 << " " << matrix._34 << "\n";
+	std::cout << matrix._41 << " " << matrix._42 << " " << matrix._43 << " " << matrix._44 << "\n";
 }

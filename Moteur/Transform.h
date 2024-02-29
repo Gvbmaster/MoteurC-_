@@ -1,5 +1,6 @@
 #pragma once
 #include "../Common/d3dUtil.h"
+#include <iostream>
 //#include "../Common/d3dApp.h"
 //#include "../Common/MathHelper.h"
 //#include "../Common/UploadBuffer.h"
@@ -28,4 +29,5 @@ struct Transform {
 	void Rotate(float yaw, float pitch, float roll);
 
 	void UpdateMatrix();
+	void DisplayConsole();
 };
