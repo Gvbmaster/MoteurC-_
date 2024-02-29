@@ -1,24 +1,24 @@
 #include "Camera.h"
 
-Camera::Camera()
-{   
+Camera::Camera() {
 }
 
-Camera::~Camera()
-{
+Camera::~Camera() {
 }
 
-void Camera::setViewMatrix(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& at, const DirectX::XMFLOAT3& up)
-{
-    DirectX::XMStoreFloat4x4(&m_ViewMatrix, DirectX::XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&at), XMLoadFloat3(&up)));
-}
-
-void Camera::setProjectionMatrix(float fovY, float aspectRatio, float nearZ, float farZ)
-{
+void Camera::setProjectionMatrix(float fovY, float aspectRatio, float nearZ, float farZ) {
     DirectX::XMStoreFloat4x4(&m_ProjectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fovY, aspectRatio, nearZ, farZ));
 }
 
-void Camera::update(float deltaTime) {
-    // Update the camera position
+
+const DirectX::XMFLOAT4X4& Camera::getViewMatrix() const {
+    return m_transform.matrix;
 }
 
+const DirectX::XMFLOAT4X4& Camera::getProjectionMatrix() const {
+    return m_ProjectionMatrix;
+}
+
+void Camera::update(float deltaTime) {
+    Component::update(deltaTime);
+}

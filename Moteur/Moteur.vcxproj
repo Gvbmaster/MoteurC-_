@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Common\d3dUtil.cpp" />
+    <ClCompile Include="..\Common\GameTimer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DX12Initializer.cpp" />
