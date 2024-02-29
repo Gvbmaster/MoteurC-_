@@ -19,8 +19,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return -1;
     }
 
-    Camera camera;
-
     DirectX::XMFLOAT3 cameraPosition(0.0f, 0.0f, -5.0f);
     DirectX::XMFLOAT3 cameraTarget(0.0f, 0.0f, 0.0f);
     DirectX::XMFLOAT3 cameraUp(0.0f, 1.0f, 0.0f);
@@ -33,14 +31,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
 
-    camera.setViewMatrix(viewMatrix);
-
     MSG msg;
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while (true)
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT)
+                break;
+
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        else
+        {
+            dxInitializer.Draw();
+        }
     }
 
-    return (int)msg.wParam;
+    return 0;
 }
