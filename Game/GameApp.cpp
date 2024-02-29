@@ -1,12 +1,11 @@
 #include "../Moteur/Transform.h"
-#define M_PI 3.14159265358979323846
 int main(){
     Transform transform;
     transform.Identity();
     transform.Upscale(2, 1, 3);
     transform.Translate(4, 6, 5);
-    transform.Rotate(2*M_PI, M_PI, M_PI);
-    transform.DisplayConsole();
+    transform.Rotate(XM_PI, XM_PI, XM_PI);
+    transform.DisplayConsole(transform.matrix);
     return 0;
 }
 

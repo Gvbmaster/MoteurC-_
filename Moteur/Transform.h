@@ -29,5 +29,5 @@ struct Transform {
 	void Rotate(float yaw, float pitch, float roll);
 
 	void UpdateMatrix();
-	void DisplayConsole();
+	void DisplayConsole(XMFLOAT4X4 mDis);
 };
