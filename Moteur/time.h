@@ -3,13 +3,17 @@ class time
 {
 public:
 	time();
-	void reset();
-	void start();
-	void stop();
-	double getDeltaTime()const;
+	void init();
+	void update();
+	float getDeltaTime();
+	float getTotalTime();
+	void pause();// besoin ? 
 
 private:
-	double mDeltaTime;
-	double mSecondsPerCount;
+	float mDeltaTime;//s
+	float mTotalTime;//s
+	float mWindowsTime;//s
 };
+
+// timeGetTime
 

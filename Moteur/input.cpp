@@ -1,4 +1,5 @@
 #include "input.h"
+#include <iostream>
 
 input::input()
 {
@@ -7,7 +8,8 @@ input::input()
 
 void input::init()
 {
-
+	WidthScreen = GetSystemMetrics(SM_CXSCREEN);
+	HeightScreen = GetSystemMetrics(SM_CYSCREEN);
 }
 
 void input::update()
@@ -57,9 +59,24 @@ bool input::isKey(int index)
 }
 
 
-LPPOINT input::GetMouseCords(LPPOINT mouseCords)
+void input::GetMouseCords()
 {
-	BOOL GetCursorPos(
-		[out] LPPOINT mosueCords
-	);
+	if (GetCursorPos(&mouseCords)== 0)
+	{
+		std::cout << "error with GetMouseCords";
+	}
+	else
+	{
+		std::cout << "mouse cords updated";
+	}
+}
+
+int input::GetScreenWidth()
+{
+	return WidthScreen;
+}
+
+int input::GetScreenHeight()
+{
+	return HeightScreen;
 }

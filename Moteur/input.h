@@ -4,6 +4,7 @@
 
 class input
 {
+
 public:
     input();
     void init();
@@ -11,7 +12,9 @@ public:
     bool isKey(int index);
     bool isKeyPressed(int index);
     bool isKeyReleased(int index);
-    LPPOINT GetMouseCords(LPPOINT mouseCords);
+    void GetMouseCords();
+    int GetScreenWidth();
+    int GetScreenHeight();
 
     enum class KeyState
     {
@@ -20,8 +23,11 @@ public:
         holding,
         released,
     };
+
 private:
     KeyState keys[256];
-    LPPOINT mouseCords;
+    POINT mouseCords;
+    int WidthScreen;
+    int HeightScreen;
 };
 

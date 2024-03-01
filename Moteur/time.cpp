@@ -6,15 +6,26 @@ time::time()
 
 }
 
-void time::reset()
+void time::init()
 {
-	__int64 countsPerSec;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
-	mSecondsPerCount = 1.0 / (double)countsPerSec;
+	mWindowsTime = timeGetTime()/1000.0f;//s
+	mTotalTime = 0;
 	mDeltaTime = 0;
 }
 
-void time::start()
+void time::update()
 {
+	float Tick = timeGetTime() / 1000.0f;//s
+	mDeltaTime = Tick - mWindowsTime - mTotalTime;// a verif ??? 
+	mTotalTime += mDeltaTime;
+}
 
+float time::getDeltaTime()
+{
+	return mDeltaTime;
+}
+
+float time::getTotalTime()
+{
+	return mTotalTime;
 }
