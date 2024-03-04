@@ -10,25 +10,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     window.init();
     HWND hwnd = window.gethwnd();
 
-    // Initialisation de DirectX 12
-    DX12Initializer dxInitializer(hwnd);
-    HRESULT hr = dxInitializer.Initialize();
-    if (FAILED(hr)) {
-        return -1;
-    }
-
-    DirectX::XMFLOAT3 cameraPosition(0.0f, 0.0f, -5.0f);
-    DirectX::XMFLOAT3 cameraTarget(0.0f, 0.0f, 0.0f);
-    DirectX::XMFLOAT3 cameraUp(0.0f, 1.0f, 0.0f);
-
-    DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtLH(
-        DirectX::XMLoadFloat3(&cameraPosition),
-        DirectX::XMLoadFloat3(&cameraTarget),
-        DirectX::XMLoadFloat3(&cameraUp)
-    );
-
-    viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
-
     MSG msg;
     while (true)
     {
@@ -39,10 +20,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }
-        else
-        {
-            dxInitializer.Draw();
         }
     }
 

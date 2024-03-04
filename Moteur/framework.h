@@ -17,4 +17,3 @@
 #include "MathHelper.h"
 #include <stdio.h>
 #include <string>
-#include "d3dUtil.h"

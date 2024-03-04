@@ -45,7 +45,7 @@
     <ClInclude Include="MathHelper.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXApp.h">
+    <ClInclude Include="DXApp.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="d3dUtil.h">
@@ -80,7 +80,7 @@
     <ClCompile Include="MathHelper.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXApp.cpp">
+    <ClCompile Include="DXApp.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="d3dUtil.cpp">
