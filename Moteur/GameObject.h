@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common/d3dUtil.h"
+#include <vector>
 #include <iostream>
 #include "Component.h"
 #include "Transform.h"

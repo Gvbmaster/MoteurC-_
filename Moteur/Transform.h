@@ -1,5 +1,5 @@
 #pragma once
-#include "../Common/d3dUtil.h"
+#include "framework.h"
 #include <iostream>
 
 using namespace DirectX;

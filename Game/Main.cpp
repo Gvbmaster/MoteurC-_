@@ -1,6 +1,4 @@
 #include "../Moteur/Window.h"
-#include "../Moteur/DX12Initializer.h"
-#include "../Moteur/Camera.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,

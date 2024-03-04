@@ -129,24 +129,28 @@
   <ItemGroup>
     <ClInclude Include="..\Common\d3dx12.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="DDSTextureLoader.h" />
-    <ClInclude Include="DX12Initializer.h" />
+    <ClInclude Include="DirectXApp.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Moteur.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Time.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
-    <ClCompile Include="DX12Initializer.cpp" />
+    <ClCompile Include="DirectXApp.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="Moteur.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Time.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
