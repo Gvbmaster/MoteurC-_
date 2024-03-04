@@ -1,11 +1,9 @@
 #pragma once
 #include "../Common/d3dUtil.h"
 #include <iostream>
-//#include "../Common/d3dApp.h"
-//#include "../Common/MathHelper.h"
-//#include "../Common/UploadBuffer.h"
 
 using namespace DirectX;
+
 struct Transform {
 	XMFLOAT3 vPos;
 	XMFLOAT4X4 mPos;

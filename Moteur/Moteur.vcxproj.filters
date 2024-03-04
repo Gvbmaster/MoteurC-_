@@ -45,9 +45,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="DX12Initializer.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -55,6 +52,9 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="Transform.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,9 +74,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="DX12Initializer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -87,6 +84,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="..\Common\GameTimer.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
