@@ -1,5 +1,5 @@
 #pragma once
-#include "../Common/d3dUtil.h"
+#include "Utils.h"
 #include <iostream>
 //#include "../Common/d3dApp.h"
 //#include "../Common/MathHelper.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Common/d3dUtil.h"
+#include "Utils.h"
 #include "Component.h"
 
 class Camera : public Component {
