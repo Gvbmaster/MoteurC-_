@@ -1,6 +1,9 @@
 #pragma once
-#include "framework.h"
+#include "Utils.h"
 #include <iostream>
+//#include "../Common/d3dApp.h"
+//#include "../Common/MathHelper.h"
+//#include "../Common/UploadBuffer.h"
 
 using namespace DirectX;
 struct Transform {
@@ -26,5 +29,5 @@ struct Transform {
 	void Rotate(float yaw, float pitch, float roll);
 
 	void UpdateMatrix();
-	void DisplayConsole();
+	void DisplayConsole(XMFLOAT4X4 mDis);
 };

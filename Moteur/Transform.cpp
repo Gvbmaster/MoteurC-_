@@ -1,3 +1,5 @@
+#include "pch.h"
+#include "framework.h"
 #include "Transform.h"
 
 
@@ -6,44 +8,68 @@ void Transform::Identity() {
 	XMStoreFloat4x4(&mPos, XMMatrixIdentity());
 
 	vSca = { 1, 1, 1 };
-	XMStoreFloat4x4(&mSca, XMMatrixIdentity());
+	mSca = mPos;
 
 	vDir = { 1, 0, 0 };
 	vRight = { 0, 1, 0 };
 	vUp = { 0, 0, 1 };
 	qRot = { 0, 0, 0, 1 };
-	XMStoreFloat4x4(&mRot, XMMatrixIdentity());
+	mRot = mPos;
 
-	XMStoreFloat4x4(&matrix, XMMatrixIdentity());
+	matrix = mPos;
 }
 
 void Transform::Translate(float front, float right, float up) {
 	vPos.x += front;
 	vPos.y += right;
 	vPos.z += up;
-	XMVECTOR v_vPos = XMLoadFloat3(&vPos);
-	XMMATRIX m_mPos = XMLoadFloat4x4(&mPos);
-	m_mPos *= XMMatrixTranslationFromVector(v_vPos);
+	XMMATRIX m_mPos = XMMatrixTranslation(vPos.x, vPos.y, vPos.z);
 	XMStoreFloat4x4(&mPos, m_mPos);
 	UpdateMatrix();
-	
 }
 
 //Make Upscale from a ratio
 void Transform::Upscale(float width, float depth, float height) {
 	vSca = { width, depth, height };
-	XMVECTOR v_vSca = XMLoadFloat3(&vSca);
 	XMMATRIX m_mSca = XMLoadFloat4x4(&mSca);
-	m_mSca *= XMMatrixScalingFromVector(v_vSca);
+	m_mSca *= XMMatrixScaling(vSca.x, vSca.y, vSca.z);
 	XMStoreFloat4x4(&mSca, m_mSca);
 	UpdateMatrix();
 }
 
 //Make rotate from yaw, pitch and roll in radians
 void Transform::Rotate(float yaw, float pitch, float roll) {
-	XMMATRIX m_mRot = XMLoadFloat4x4(&mRot);
-	m_mRot *= XMMatrixRotationRollPitchYaw(pitch,yaw,roll);
+	XMVECTOR v_vDir = XMLoadFloat3(&vDir);
+	XMVECTOR v_vRight = XMLoadFloat3(&vRight);
+	XMVECTOR v_vUp = XMLoadFloat3(&vUp);
+
+	XMVECTOR v_Rot;
+	XMVECTOR v_vTemp;
+	v_vTemp = XMQuaternionRotationAxis(v_vDir, yaw);
+	v_Rot = v_vTemp;
+	v_vTemp = XMQuaternionRotationAxis(v_vRight, pitch);
+	v_Rot = XMQuaternionMultiply(v_Rot, v_vTemp);
+	v_vTemp = XMQuaternionRotationAxis(v_vUp, roll);
+	v_Rot = XMQuaternionMultiply(v_Rot, v_vTemp);
+
+
+	XMVECTOR v_qRot = XMLoadFloat4(&qRot);
+	v_qRot = XMQuaternionMultiply(v_qRot, v_Rot);
+	XMStoreFloat4(&qRot, v_qRot);
+
+	XMMATRIX m_mRot = XMMatrixRotationQuaternion(v_qRot);
 	XMStoreFloat4x4(&mRot, m_mRot);
+
+	vRight.x = mRot._11;
+	vRight.y = mRot._12;
+	vRight.z = mRot._13;
+	vUp.x = mRot._21;
+	vUp.y = mRot._22;
+	vUp.z = mRot._23;
+	vDir.x = mRot._31;
+	vDir.y = mRot._32;
+	vDir.z = mRot._33;
+
 	UpdateMatrix();
 }
 
@@ -57,9 +83,9 @@ void Transform::UpdateMatrix() {
 }
 
 
-void Transform::DisplayConsole() {
-	std::cout << matrix._11 << " " << matrix._12 << " " << matrix._13 << " " << matrix._14 << "\n";
-	std::cout << matrix._21 << " " << matrix._22 << " " << matrix._23 << " " << matrix._24 << "\n";
-	std::cout << matrix._31 << " " << matrix._32 << " " << matrix._33 << " " << matrix._34 << "\n";
-	std::cout << matrix._41 << " " << matrix._42 << " " << matrix._43 << " " << matrix._44 << "\n";
+void Transform::DisplayConsole(XMFLOAT4X4 mDis) {
+	std::cout << mDis._11 << " " << mDis._12 << " " << mDis._13 << " " << mDis._14 << "\n";
+	std::cout << mDis._21 << " " << mDis._22 << " " << mDis._23 << " " << mDis._24 << "\n";
+	std::cout << mDis._31 << " " << mDis._32 << " " << mDis._33 << " " << mDis._34 << "\n";
+	std::cout << mDis._41 << " " << mDis._42 << " " << mDis._43 << " " << mDis._44 << "\n";
 }
