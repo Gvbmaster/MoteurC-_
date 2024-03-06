@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "Camera.h"
 
-Camera::Camera() {
+Camera::Camera() : Component(nullptr) {
+    DirectX::XMStoreFloat4x4(&m_ViewMatrix, DirectX::XMMatrixIdentity());
+	DirectX::XMStoreFloat4x4(&m_ProjectionMatrix, DirectX::XMMatrixIdentity());
 }
 
 Camera::~Camera() {
@@ -13,7 +15,7 @@ void Camera::setProjectionMatrix(float fovY, float aspectRatio, float nearZ, flo
 
 
 const DirectX::XMFLOAT4X4& Camera::getViewMatrix() const {
-    return m_transform.matrix;
+    return m_ViewMatrix;
 }
 
 const DirectX::XMFLOAT4X4& Camera::getProjectionMatrix() const {

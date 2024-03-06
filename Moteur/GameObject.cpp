@@ -15,12 +15,9 @@ void GameObject::addComponent(Component* component)
 
 Component* GameObject::getComponent(ComponentType type) {
     for (auto& component : m_components) {
-        // Vous devrez ajouter une méthode getType() à la classe Component pour obtenir le type de chaque composant
-        // Par exemple :
-        // if (component->getType() == type) {
-        //     std::cout << "Le composant a été trouvé!" << std::endl;
-        //     return component;
-        // }
+        if (component->getType() == type) {
+			return component;
+		}
     }
     std::cout << "Le composant n'a pas été trouvé!" << std::endl;
     return nullptr;

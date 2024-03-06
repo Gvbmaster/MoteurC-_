@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "Component.h"
 
-Component::Component(const Component& other) {
-	m_transform = other.m_transform;
+Component::Component(GameObject* gameObject) : m_gameObject(gameObject) {
 }
 
 Component::~Component() {
@@ -13,12 +12,11 @@ ComponentType Component::getType() const {
 }
 
 void Component::init() {
-    m_transform.Identity();
 }
 
-void Component::update(float deltaTime) {
-    m_transform.UpdateMatrix();
+void Component::update(float detalTime) {
 }
 
 // void Component::draw(Renderer& renderer) {
+// 	renderer.draw(*this);
 // }

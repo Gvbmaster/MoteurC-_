@@ -15,5 +15,7 @@ public:
     virtual void update(float deltaTime) override;
 
 private:
+    DirectX::XMFLOAT4X4 m_ViewMatrix;
     DirectX::XMFLOAT4X4 m_ProjectionMatrix;
 };
+

@@ -2,7 +2,7 @@
 //#include "../Common/d3dUtil.h"
 //#include "GameObject.h"
 //#include "Renderer.h"
-#include "Transform.h"
+#include "GameObject.h"
 
 enum class ComponentType {
     Transform,
@@ -11,16 +11,16 @@ enum class ComponentType {
 
 class Component {
 public:
-    Component(const Component& other);
+    Component(GameObject* gameObject);
     virtual ~Component();
 
     virtual void init();
     virtual void update(float deltaTime);
     // virtual void draw(Renderer& renderer);
     virtual ComponentType getType() const = 0;
-
-    Transform& getTransform() { return m_transform; }
+    GameObject* getGameObject() { return m_gameObject; }
+    Transform& getTransform() { return m_gameObject->getTransform(); }
 
 protected:
-    Transform m_transform;
+    GameObject* m_gameObject;
 };
