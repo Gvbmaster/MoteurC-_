@@ -11,13 +11,13 @@ enum class ComponentType {
 
 class Component {
 public:
-    Component();
+    Component(const Component& other);
     virtual ~Component();
 
     virtual void init();
     virtual void update(float deltaTime);
     // virtual void draw(Renderer& renderer);
-    // virtual ComponentType getType() const = 0;
+    virtual ComponentType getType() const = 0;
 
     Transform& getTransform() { return m_transform; }
 
