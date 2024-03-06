@@ -2,7 +2,7 @@
 // InitApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 #include "pch.h"
-#include "framework.h"
+//#include "framework.h"
 #include "Utils.h"
 
 #include "initApp.h"
@@ -11,7 +11,7 @@
 
 
 
-using Microsoft::WRL::ComPtr;
+
 using namespace std;
 using namespace DirectX;
 
@@ -135,6 +135,10 @@ int InitApp::Run()
 	MSG msg = { 0 };
 
 	mTimer.Reset();
+	Meshes meshes;
+	meshes.CreateMeshCube(md3dDevice, mCommandList);
+	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshes.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
+	meshes.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice, mPSO);
 
 	while (msg.message != WM_QUIT)
 	{
@@ -154,6 +158,8 @@ int InitApp::Run()
 				CalculateFrameStats();
 				Update(mTimer);
 				Draw(mTimer);
+				meshes.DrawMeshes(mCommandList);
+				
 			}
 			else
 			{
@@ -482,7 +488,7 @@ bool InitApp::InitDirect3D()
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
 	{
-		ComPtr<ID3D12Debug> debugController;
+		ID3D12Debug* debugController;
 		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 		debugController->EnableDebugLayer();
 	}
@@ -499,7 +505,7 @@ HRESULT hardwareResult = D3D12CreateDevice(
 // Fallback to WARP device.
 if (FAILED(hardwareResult))
 {
-	ComPtr<IDXGIAdapter> pWarpAdapter;
+	IDXGIAdapter* pWarpAdapter;
 	ThrowIfFailed(mdxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWarpAdapter)));
 
 	ThrowIfFailed(D3D12CreateDevice(

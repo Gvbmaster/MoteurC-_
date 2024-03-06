@@ -29,6 +29,7 @@
 #include <fstream>
 #include <DirectXMathVector.inl>
 #include <DirectXMathMatrix.inl>
+#include <d3d12.h>
+#include <stdio.h>
 #include "MathHelper.h"
-
 #include "d3dx12.h"

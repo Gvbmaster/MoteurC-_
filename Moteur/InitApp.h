@@ -6,11 +6,17 @@
 #endif
 #include "framework.h"
 #include "GameTimer.h"
+#include "Renderer.h"
+#include "Utils.h"
+#include "UploadBuffer.h"
 
-// Link necessary d3d12 libraries.
-#pragma comment(lib,"d3dcompiler.lib")
-#pragma comment(lib, "D3D12.lib")
-#pragma comment(lib, "dxgi.lib")
+using namespace DirectX;
+
+struct ObjectConstants
+{
+    XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
+};
+
 
 class InitApp
 {
@@ -37,6 +43,32 @@ public:
     void OnResize();
     void Update(const GameTimer& gt);
     void Draw(const GameTimer& gt);
+
+    ID3D12Device* GetDevice() { return md3dDevice; };
+    ID3D12GraphicsCommandList* GetCommandList() { return mCommandList; };
+    ID3D12RootSignature* mRootSignature = nullptr;
+    ID3D12DescriptorHeap* mCbvHeap = nullptr;
+
+    std::unique_ptr<UploadBuffer<ObjectConstants>> mObjectCB = nullptr;
+
+    std::unique_ptr<MeshGeometry> mBoxGeo = nullptr;
+
+    ID3DBlob* mvsByteCode = nullptr;
+    ID3DBlob* mpsByteCode = nullptr;
+
+    std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
+
+    ID3D12PipelineState* mPSO = nullptr;
+
+    XMFLOAT4X4 mWorld = MathHelper::Identity4x4();
+    XMFLOAT4X4 mView = MathHelper::Identity4x4();
+    XMFLOAT4X4 mProj = MathHelper::Identity4x4();
+
+    float mTheta = 1.5f * XM_PI;
+    float mPhi = XM_PIDIV4;
+    float mRadius = 5.0f;
+
+    POINT mLastMousePos;
 
 protected:
 
@@ -83,24 +115,24 @@ protected:
     // Used to keep track of the “delta-time” and game time (§4.4).
     GameTimer mTimer;
 
-    Microsoft::WRL::ComPtr<IDXGIFactory4> mdxgiFactory;
-    Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
-    Microsoft::WRL::ComPtr<ID3D12Device> md3dDevice;
+    IDXGIFactory4* mdxgiFactory;
+    IDXGISwapChain* mSwapChain;
+    ID3D12Device* md3dDevice;
 
-    Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
+    ID3D12Fence* mFence;
     UINT64 mCurrentFence = 0;
 
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
-    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
-    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
+    ID3D12CommandQueue* mCommandQueue;
+    ID3D12CommandAllocator* mDirectCmdListAlloc;
+    ID3D12GraphicsCommandList* mCommandList;
 
     static const int SwapChainBufferCount = 2;
     int mCurrBackBuffer = 0;
-    Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[SwapChainBufferCount];
-    Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
+    ID3D12Resource* mSwapChainBuffer[SwapChainBufferCount];
+    ID3D12Resource* mDepthStencilBuffer;
 
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvHeap;
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvHeap;
+    ID3D12DescriptorHeap* mRtvHeap;
+    ID3D12DescriptorHeap* mDsvHeap;
 
     D3D12_VIEWPORT mScreenViewport;
     D3D12_RECT mScissorRect;

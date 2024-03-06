@@ -1,5 +1,5 @@
 #pragma once
-#include "pch.h"
+//#include "pch.h"
 #include "framework.h"
 #include "Utils.h"
 #include "InitApp.h"
@@ -22,22 +22,19 @@ struct Vertex2
 	XMFLOAT2 uv;
 };
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> desc1 =
-{
-{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-};
 
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> desc2 =
-{
-{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-};
-
-class Mesh : public InitApp {
+class Meshes{
 
 public:
-	void meshCube();
+	std::vector<ID3D12GraphicsCommandList*> vMeshList;
+	std::vector<D3D12_INPUT_ELEMENT_DESC> BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode);
+	void CreateMeshCube(ID3D12Device* md3dDevice, ID3D12GraphicsCommandList* mCommandList);
+	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList);
+	void BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature, ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO);
+
+
+	Meshes(){};
+	~Meshes() {};
 
 };
