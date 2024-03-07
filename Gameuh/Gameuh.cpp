@@ -4,8 +4,6 @@
 #include <Windows.h>
 #include <iostream>
 #include "../Moteur/InitApp.h"
-#include "../Moteur/Utils.h"
-#include "../Moteur/Renderer.h"
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)

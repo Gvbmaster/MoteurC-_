@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "Utils.h"
 #include "Renderer.h"
 
 std::vector<D3D12_INPUT_ELEMENT_DESC> Meshes::BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode) {
@@ -16,8 +15,8 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> Meshes::BuildShadersAndInputLayout(ID3DBlo
 }
 
 
-void Meshes::CreateMeshCube(ComPtr<ID3D12Device> md3dDevice, ComPtr<ID3D12GraphicsCommandList> mCommandList) {
-	
+Vertex1 Meshes::CreateMeshVertices() {
+
 	Vertex1 vertices[] =
 	{
 	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) },
@@ -30,18 +29,11 @@ void Meshes::CreateMeshCube(ComPtr<ID3D12Device> md3dDevice, ComPtr<ID3D12Graphi
 	{ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) }
 	};
 
+	return vertices;
+}
 
-	const UINT64 vbByteSize = 8 * sizeof(Vertex1);
-	ComPtr<ID3D12Resource> VertexBufferGPU = nullptr;
-	ComPtr<ID3D12Resource> VertexBufferUploader = nullptr;
-	VertexBufferGPU = Utils::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), vertices, vbByteSize, VertexBufferUploader);
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-	vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
-	vbv.StrideInBytes = sizeof(Vertex1);
-	vbv.SizeInBytes = 8 * sizeof(Vertex1);
-	D3D12_VERTEX_BUFFER_VIEW vertexBuffers[1] = { vbv };
-
-
+std::uint16_t Meshes::CreateMeshIndices()
+{
 	std::uint16_t indices[] = {
 		// front face
 		0, 1, 2,
@@ -62,32 +54,44 @@ void Meshes::CreateMeshCube(ComPtr<ID3D12Device> md3dDevice, ComPtr<ID3D12Graphi
 		4, 0, 3,
 		4, 3, 7
 	};
+
+	
+	return indices;
+}
+
+void Meshes::DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12Device* md3dDevice,Vertex1 vertices[], uint16_t indices[]) {
+	const UINT64 vbByteSize = 8 * sizeof(Vertex1);
+	ID3D12Resource* VertexBufferGPU = nullptr;
+	ID3D12Resource* VertexBufferUploader = nullptr;
+	VertexBufferGPU = Utils::CreateDefaultBuffer(md3dDevice, mCommandList, vertices, vbByteSize, VertexBufferUploader);
+
 	const UINT ibByteSize = 36 * sizeof(std::uint16_t);
-	ComPtr<ID3D12Resource> IndexBufferGPU = nullptr;
-	ComPtr<ID3D12Resource> IndexBufferUploader = nullptr;
-	IndexBufferGPU = Utils::CreateDefaultBuffer(md3dDevice.Get(), mCommandList.Get(), indices, ibByteSize, IndexBufferUploader);
+	ID3D12Resource* IndexBufferGPU = nullptr;
+	ID3D12Resource* IndexBufferUploader = nullptr;
+	IndexBufferGPU = Utils::CreateDefaultBuffer(md3dDevice, mCommandList, indices, ibByteSize, IndexBufferUploader);
 	D3D12_INDEX_BUFFER_VIEW ibv;
 	ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
 	ibv.Format = DXGI_FORMAT_R16_UINT;
 	ibv.SizeInBytes = ibByteSize;
-
-	mCommandList->IASetVertexBuffers(0, 1, vertexBuffers);
-	mCommandList->IASetIndexBuffer(&ibv);
-	vMeshList.push_back(mCommandList); 
-}
-
-void Meshes::DrawMeshes(ComPtr<ID3D12GraphicsCommandList> mCommandList) {
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+	vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
+	vbv.StrideInBytes = sizeof(Vertex1);
+	vbv.SizeInBytes = 8 * sizeof(Vertex1);
+	D3D12_VERTEX_BUFFER_VIEW vertexBuffers[1] = { vbv };
+	vMeshList.push_back(mCommandList);
 	for (int i = 0; i < vMeshList.size(); i++) {
+		mCommandList->IASetVertexBuffers(0, 1, vertexBuffers);
+		mCommandList->IASetIndexBuffer(&ibv);
 		mCommandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
 	}
 }
 
-void Meshes::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ComPtr<ID3D12RootSignature> mRootSignature,ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ComPtr<ID3D12Device> md3dDevice, Microsoft::WRL::ComPtr<ID3D12PipelineState> mPSO)
+void Meshes::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature,ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	psoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
-	psoDesc.pRootSignature = mRootSignature.Get();
+	psoDesc.pRootSignature = mRootSignature;
 	psoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
@@ -108,5 +112,6 @@ void Meshes::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ComPtr
 	psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
 	psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	psoDesc.DSVFormat = mDepthStencilFormat;
-	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
+	HRESULT hr = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO));
+	assert(hr);
 }

@@ -2,7 +2,6 @@
 //#include "pch.h"
 #include "framework.h"
 #include "Utils.h"
-#include "InitApp.h"
 #include "vector"
 
 using namespace DirectX;
@@ -29,8 +28,9 @@ class Meshes{
 public:
 	std::vector<ID3D12GraphicsCommandList*> vMeshList;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode);
-	void CreateMeshCube(ID3D12Device* md3dDevice, ID3D12GraphicsCommandList* mCommandList);
-	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList);
+	Vertex1 CreateMeshVertices();
+	std::uint16_t CreateMeshIndices();
+	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12Device* md3dDevice, Vertex1 vertices[], uint16_t indices[]);
 	void BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature, ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO);
 
 

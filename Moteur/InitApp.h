@@ -4,10 +4,8 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "framework.h"
 #include "GameTimer.h"
 #include "Renderer.h"
-#include "Utils.h"
 #include "UploadBuffer.h"
 
 using namespace DirectX;
@@ -43,6 +41,7 @@ public:
     void OnResize();
     void Update(const GameTimer& gt);
     void Draw(const GameTimer& gt);
+    void BuildRootSignature();
 
     ID3D12Device* GetDevice() { return md3dDevice; };
     ID3D12GraphicsCommandList* GetCommandList() { return mCommandList; };

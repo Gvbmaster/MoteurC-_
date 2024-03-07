@@ -92,7 +92,7 @@ public:
         ID3D12GraphicsCommandList* cmdList,
         const void* initData,
         UINT64 byteSize,
-        ID3D12Resource uploadBuffer);
+        ID3D12Resource* uploadBuffer);
 
     static ID3DBlob* CompileShader(
         const std::wstring& filename,
