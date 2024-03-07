@@ -5,7 +5,7 @@
 #include <iostream>
 #include "../Moteur/InitApp.h"
 #include "../Moteur/Utils.h"
-
+#include "../Moteur/GameObject.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 	PSTR cmdLine, int showCmd)
@@ -21,6 +21,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 
 		if (!theApp.Initialize())
 			return 0;
+
+		GameObject Game;
+
 
 		return theApp.Run();
 	}

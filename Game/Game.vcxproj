@@ -19,8 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionScript.cpp" />
+    <ClCompile Include="EnemyScript.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="PlayerScript.cpp" />
+    <ClCompile Include="ProjectileScript.cpp" />
+    <ClCompile Include="Rock.cpp" />
     <ClCompile Include="test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CollisionScript.h" />
+    <ClInclude Include="EnemyScript.h" />
+    <ClInclude Include="PlayerScript.h" />
+    <ClInclude Include="ProjectileScript.h" />
+    <ClInclude Include="Rock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
