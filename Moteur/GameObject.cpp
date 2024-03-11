@@ -8,6 +8,21 @@ GameObject::~GameObject()
 {
 }
 
+int GameObject::GetX()
+{
+    return m_x;
+}
+
+int GameObject::GetY()
+{
+    return m_y;
+}
+
+int GameObject::GetZ()
+{
+    return m_z;
+}
+
 void GameObject::addComponent(Component* component) 
 {
     m_components.push_back(component);

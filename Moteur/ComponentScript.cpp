@@ -13,15 +13,3 @@ void ComponentScript::init() {
 void ComponentScript::update(float deltaTime) {
 
 }
-
-void ComponentScript::onCollisionEnter(Component* other) {
-
-}
-
-void ComponentScript::onCollisionStay(Component* other) {
-    
-}
-
-void ComponentScript::onCollisionExit(Component* other) {
-
-}

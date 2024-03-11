@@ -1,12 +1,12 @@
-// Collider.h
 #pragma once
-#include "Component.h"
-
-class Collider : public Component {
+#include "GameObject.h"
+class Collider
+{
 public:
-    Collider(GameObject* gameObject) : Component(gameObject) {}
+    Collider();
     ~Collider();
-    virtual bool Collides(Collider* other) = 0;
+    double dist2OBJ(GameObject OBJ1, GameObject OBJ2);
+
 private:
 
 };

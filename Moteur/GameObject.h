@@ -10,6 +10,10 @@ public:
     GameObject();
     virtual ~GameObject();
 
+    int GetX();
+    int GetY();
+    int GetZ();
+
     void addComponent(Component* component);
     Component* getComponent(ComponentType type);
     void update(float deltaTime);
@@ -19,4 +23,8 @@ public:
 private:
     std::vector<Component*> m_components;
     Transform m_transform;
+
+    float m_x;
+    float m_y;
+    float m_z;
 };

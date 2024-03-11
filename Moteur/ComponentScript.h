@@ -9,7 +9,4 @@ public:
 
     virtual void init() {}
     virtual void update(float deltaTime) {}
-    virtual void onCollisionEnter(Component* other) {}
-    virtual void onCollisionStay(Component* other) {}
-    virtual void onCollisionExit(Component* other) {}
 };
