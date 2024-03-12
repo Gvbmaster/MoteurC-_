@@ -20,6 +20,8 @@ class InitApp
 {
 
 public:
+
+    MeshManager meshManager;
     InitApp(HINSTANCE hInstance);
     InitApp(const InitApp& rhs) = delete;
     InitApp& operator=(const InitApp& rhs) = delete;

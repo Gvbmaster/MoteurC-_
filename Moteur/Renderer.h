@@ -3,6 +3,9 @@
 #include "framework.h"
 #include "Utils.h"
 #include "vector"
+//#include "Mesh.h"
+
+class Mesh;
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -23,18 +26,21 @@ struct Vertex2
 
 
 
-class Meshes{
+class MeshManager{
 
 public:
-	std::vector<ID3D12GraphicsCommandList*> vMeshList;
+	std::vector<Mesh*> vMesh;
+
+	std::vector<ID3D12GraphicsCommandList*> vMeshCommandList;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode);
-	Vertex1 CreateMeshVertices();
-	std::uint16_t CreateMeshIndices();
-	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12Device* md3dDevice, Vertex1 vertices[], uint16_t indices[]);
+
+
+
+	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::unique_ptr<MeshGeometry> mBoxGeo);
 	void BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature, ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO);
 
 
-	Meshes(){};
-	~Meshes() {};
+	MeshManager(){};
+	~MeshManager() {};
 
 };

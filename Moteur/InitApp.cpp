@@ -5,6 +5,8 @@
 //#include "framework.h"
 
 #include "initApp.h"
+#include "Mesh.h"
+#include "Renderer.h"
 
 
 
@@ -115,6 +117,22 @@ void InitApp::Draw(const GameTimer& gt)
 
 	mCommandList->OMSetRenderTargets(1, &backBufferView, true, &depthStencilView);
 
+
+	///
+	meshManager.DrawMeshes(mCommandList,mCbvHeap,mRootSignature,mBoxGeo);
+
+
+	///
+
+
+	barrierTransition = CD3DX12_RESOURCE_BARRIER::Transition(
+		CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	mCommandList->ResourceBarrier(1, &barrierTransition);
+
 	// Done recording commands.
 	ThrowIfFailed(mCommandList->Close());
 
@@ -136,15 +154,16 @@ int InitApp::Run()
 {
 	MSG msg = { 0 };
 
-
-	mRootSignature   ;
+	
 
 	mTimer.Reset();
-	Meshes meshes;
-	Vertex1 vertices = meshes.CreateMeshVertices();
-	std::uint16_t indices = meshes.CreateMeshIndices();
-	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshes.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
-	meshes.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice, mPSO);
+	MeshManager meshManager;
+	//Mesh mesh;
+	//mesh.CreateCubeMesh(meshManager, mCommandList, md3dDevice);
+
+	
+	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshManager.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
+	meshManager.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice, mPSO);
 	while (msg.message != WM_QUIT)
 	{
 		// If there are Window messages then process them.
@@ -163,13 +182,15 @@ int InitApp::Run()
 				CalculateFrameStats();
 				Update(mTimer);
 				Draw(mTimer);
-				meshes.DrawMeshes(mCommandList, md3dDevice, &vertices, &indices);
+				//meshes.DrawMeshes(mCommandList, md3dDevice, &vertices, &indices);
 			}
 			else
 			{
 				Sleep(100);
 			}
 		}
+
+
 	}
 
 	return (int)msg.wParam;

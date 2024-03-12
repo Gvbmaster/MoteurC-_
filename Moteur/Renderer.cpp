@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "Renderer.h"
+#include "Mesh.h"
 
-std::vector<D3D12_INPUT_ELEMENT_DESC> Meshes::BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode) {
+
+
+std::vector<D3D12_INPUT_ELEMENT_DESC> MeshManager::BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode) {
 	*mvsByteCode = Utils::CompileShader(L"../Moteur/Shaders/color.hlsl", nullptr, "VS", "vs_5_0");
 	*mpsByteCode = Utils::CompileShader(L"../Moteur/Shaders/color.hlsl", nullptr, "PS", "ps_5_0");
 
@@ -15,78 +18,28 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> Meshes::BuildShadersAndInputLayout(ID3DBlo
 }
 
 
-Vertex1 Meshes::CreateMeshVertices() {
 
-	Vertex1 vertices[] =
-	{
-	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) },
-	{ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) },
-	{ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) },
-	{ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) },
-	{ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) },
-	{ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) },
-	{ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) },
-	{ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) }
-	};
 
-	return vertices;
-}
+void MeshManager::DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::unique_ptr<MeshGeometry> mBoxGeo) {
+	for (int i = 0; i < vMesh.size(); i++) {
+		ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap };
+		mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-std::uint16_t Meshes::CreateMeshIndices()
-{
-	std::uint16_t indices[] = {
-		// front face
-		0, 1, 2,
-		0, 2, 3,
-		// back face
-		4, 6, 5,
-		4, 7, 6,
-		// left face
-		4, 5, 1,
-		4, 1, 0,
-		// right face
-		3, 2, 6,
-		3, 6, 7,
-		// top face
-		1, 5, 6,
-		1, 6, 2,
-		// bottom face
-		4, 0, 3,
-		4, 3, 7
-	};
+		mCommandList->SetGraphicsRootSignature(mRootSignature);
 
-	
-	return indices;
-}
+		mCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
+		mCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
+		mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-void Meshes::DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12Device* md3dDevice,Vertex1 vertices[], uint16_t indices[]) {
-	const UINT64 vbByteSize = 8 * sizeof(Vertex1);
-	ID3D12Resource* VertexBufferGPU = nullptr;
-	ID3D12Resource* VertexBufferUploader = nullptr;
-	VertexBufferGPU = Utils::CreateDefaultBuffer(md3dDevice, mCommandList, vertices, vbByteSize, VertexBufferUploader);
+		mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 
-	const UINT ibByteSize = 36 * sizeof(std::uint16_t);
-	ID3D12Resource* IndexBufferGPU = nullptr;
-	ID3D12Resource* IndexBufferUploader = nullptr;
-	IndexBufferGPU = Utils::CreateDefaultBuffer(md3dDevice, mCommandList, indices, ibByteSize, IndexBufferUploader);
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = ibByteSize;
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-	vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
-	vbv.StrideInBytes = sizeof(Vertex1);
-	vbv.SizeInBytes = 8 * sizeof(Vertex1);
-	D3D12_VERTEX_BUFFER_VIEW vertexBuffers[1] = { vbv };
-	vMeshList.push_back(mCommandList);
-	for (int i = 0; i < vMeshList.size(); i++) {
-		mCommandList->IASetVertexBuffers(0, 1, vertexBuffers);
-		mCommandList->IASetIndexBuffer(&ibv);
-		mCommandList->DrawIndexedInstanced(36, 1, 0, 0, 0);
+		mCommandList->DrawIndexedInstanced(
+			mBoxGeo->DrawArgs["box"].IndexCount,
+			1, 0, 0, 0);
 	}
 }
 
-void Meshes::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature,ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO)
+void MeshManager::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature,ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -113,5 +66,5 @@ void Meshes::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12
 	psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	psoDesc.DSVFormat = mDepthStencilFormat;
 	HRESULT hr = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO));
-	assert(hr);
+	assert(hr== S_OK);
 }
