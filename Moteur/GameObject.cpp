@@ -8,19 +8,19 @@ GameObject::~GameObject()
 {
 }
 
-int GameObject::GetX()
+float GameObject::GetX()
 {
-    return m_x;
+    return m_transform.vPos.x;
 }
 
-int GameObject::GetY()
+float GameObject::GetY()
 {
-    return m_y;
+    return m_transform.vPos.y;
 }
 
-int GameObject::GetZ()
+float GameObject::GetZ()
 {
-    return m_z;
+    return m_transform.vPos.z;
 }
 
 void GameObject::addComponent(Component* component) 

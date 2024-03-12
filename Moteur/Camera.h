@@ -11,7 +11,6 @@ public:
 
     const DirectX::XMFLOAT4X4& getViewMatrix() const;
     const DirectX::XMFLOAT4X4& getProjectionMatrix() const;
-
     virtual void update(float deltaTime) override;
 
 private:

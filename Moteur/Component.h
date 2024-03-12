@@ -2,8 +2,6 @@
 
 #include "GameObject.h"
 
-class GameObject;
-
 enum class ComponentType {
     Transform,
     Renderer,
@@ -22,5 +20,5 @@ public:
 
 protected:
     GameObject* m_gameObject;
-    Transform& getTransform() { return m_gameObject->getTransform(); }
+    Transform* getTransform() { return &m_gameObject->getTransform(); }
 };

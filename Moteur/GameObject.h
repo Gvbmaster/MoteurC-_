@@ -10,9 +10,9 @@ public:
     GameObject();
     virtual ~GameObject();
 
-    int GetX();
-    int GetY();
-    int GetZ();
+    float GetX();
+    float GetY();
+    float GetZ();
 
     void addComponent(Component* component);
     Component* getComponent(ComponentType type);
@@ -23,8 +23,4 @@ public:
 private:
     std::vector<Component*> m_components;
     Transform m_transform;
-
-    float m_x;
-    float m_y;
-    float m_z;
 };
