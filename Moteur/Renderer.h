@@ -29,18 +29,18 @@ struct Vertex2
 class MeshManager{
 
 public:
+	ID3D12PipelineState* mPso = nullptr;
 	std::vector<Mesh*> vMesh;
-
 	std::vector<ID3D12GraphicsCommandList*> vMeshCommandList;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> BuildShadersAndInputLayout(ID3DBlob** mvsByteCode, ID3DBlob** mpsByteCode);
 
 
 
-	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::unique_ptr<MeshGeometry> mBoxGeo);
-	void BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature, ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO);
+	void DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::vector<Mesh*> vMesh);
+	void BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature, ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice);
 
 
-	MeshManager(){};
-	~MeshManager() {};
+	MeshManager();
+	~MeshManager() {}
 
 };

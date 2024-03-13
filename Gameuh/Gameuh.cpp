@@ -31,6 +31,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 		InitApp theApp(hInstance);
 		if (theApp.Initialize()) {
 			theApp.BuildRootSignature();
+			theApp.BuildDescriptorHeaps();
+			theApp.BuildConstantBuffers();
 			theApp.Run();
 		}
 

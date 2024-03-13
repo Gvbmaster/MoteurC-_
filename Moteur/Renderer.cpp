@@ -18,28 +18,31 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> MeshManager::BuildShadersAndInputLayout(ID
 }
 
 
+MeshManager::MeshManager()
+{
+}
 
 
-void MeshManager::DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::unique_ptr<MeshGeometry> mBoxGeo) {
+void MeshManager::DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::vector<Mesh*> vMesh) {
+
 	for (int i = 0; i < vMesh.size(); i++) {
-		ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap };
-		mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		
 
 		mCommandList->SetGraphicsRootSignature(mRootSignature);
-
-		mCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
-		mCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
+		mCommandList->SetPipelineState(mPso);
+		mCommandList->IASetVertexBuffers(0, 1, &vMesh[i]->vbv);
+		mCommandList->IASetIndexBuffer(&vMesh[i]->ibv);
 		mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
 
 		mCommandList->DrawIndexedInstanced(
-			mBoxGeo->DrawArgs["box"].IndexCount,
+			vMesh[i]->DrawArgs["box"].IndexCount,
 			1, 0, 0, 0);
 	}
 }
 
-void MeshManager::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature,ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice, ID3D12PipelineState* mPSO)
+void MeshManager::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature,ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -65,6 +68,6 @@ void MeshManager::BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, I
 	psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
 	psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	psoDesc.DSVFormat = mDepthStencilFormat;
-	HRESULT hr = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO));
+	HRESULT hr = md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPso));
 	assert(hr== S_OK);
 }

@@ -84,7 +84,7 @@ void InitApp::Update(const GameTimer& gt)
 
 }
 
-void InitApp::Draw(const GameTimer& gt)
+void InitApp::Draw(const GameTimer& gt, std::vector<Mesh*> vMesh)
 {
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
@@ -119,7 +119,9 @@ void InitApp::Draw(const GameTimer& gt)
 
 
 	///
-	meshManager.DrawMeshes(mCommandList,mCbvHeap,mRootSignature,mBoxGeo);
+	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap };
+	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	meshManager.DrawMeshes(mCommandList,mCbvHeap,mRootSignature,vMesh);
 
 
 	///
@@ -152,18 +154,29 @@ void InitApp::Draw(const GameTimer& gt)
 
 int InitApp::Run()
 {
+	int a = 0;
 	MSG msg = { 0 };
 
 	
 
 	mTimer.Reset();
-	MeshManager meshManager;
-	//Mesh mesh;
-	//mesh.CreateCubeMesh(meshManager, mCommandList, md3dDevice);
+	Mesh mesh;
+	ThrowIfFailed(mDirectCmdListAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc, nullptr));
+
+	mesh.CreateCubeMesh(meshManager, mCommandList, md3dDevice);
+	meshManager.vMesh.push_back(&mesh);
+
+	ThrowIfFailed(mCommandList->Close());
+
+	ID3D12CommandList* cmdsLists[] = { mCommandList };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+
+	FlushCommandQueue();
 
 	
 	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshManager.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
-	meshManager.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice, mPSO);
+	meshManager.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice);
 	while (msg.message != WM_QUIT)
 	{
 		// If there are Window messages then process them.
@@ -181,7 +194,7 @@ int InitApp::Run()
 			{
 				CalculateFrameStats();
 				Update(mTimer);
-				Draw(mTimer);
+				Draw(mTimer,meshManager.vMesh);
 				//meshes.DrawMeshes(mCommandList, md3dDevice, &vertices, &indices);
 			}
 			else
@@ -816,4 +829,35 @@ void InitApp::BuildRootSignature()
 		serializedRootSig->GetBufferPointer(),
 		serializedRootSig->GetBufferSize(),
 		IID_PPV_ARGS(&mRootSignature)));
+}
+
+void InitApp::BuildDescriptorHeaps()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
+		IID_PPV_ARGS(&mCbvHeap)));
+}
+
+void InitApp::BuildConstantBuffers()
+{
+	mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice, 1, true);
+
+	UINT objCBByteSize = Utils::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+	D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mObjectCB->Resource()->GetGPUVirtualAddress();
+	// Offset to the ith object constant buffer in the buffer.
+	int boxCBufIndex = 0;
+	cbAddress += boxCBufIndex * objCBByteSize;
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+	cbvDesc.BufferLocation = cbAddress;
+	cbvDesc.SizeInBytes = Utils::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+	md3dDevice->CreateConstantBufferView(
+		&cbvDesc,
+		mCbvHeap->GetCPUDescriptorHandleForHeapStart());
 }

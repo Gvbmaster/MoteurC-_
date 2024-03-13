@@ -42,8 +42,10 @@ public:
     void CreateRtvAndDsvDescriptorHeaps();
     void OnResize();
     void Update(const GameTimer& gt);
-    void Draw(const GameTimer& gt);
+    void Draw(const GameTimer& gt, std::vector<Mesh*> vMesh);
     void BuildRootSignature();
+    void BuildDescriptorHeaps();
+    void BuildConstantBuffers();
 
     ID3D12Device* GetDevice() { return md3dDevice; };
     ID3D12GraphicsCommandList* GetCommandList() { return mCommandList; };
@@ -52,14 +54,13 @@ public:
 
     std::unique_ptr<UploadBuffer<ObjectConstants>> mObjectCB = nullptr;
 
-    std::unique_ptr<MeshGeometry> mBoxGeo = nullptr;
 
     ID3DBlob* mvsByteCode = nullptr;
     ID3DBlob* mpsByteCode = nullptr;
 
     std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
-    ID3D12PipelineState* mPSO = nullptr;
+    //ID3D12PipelineState* mPSO = nullptr;
 
     XMFLOAT4X4 mWorld = MathHelper::Identity4x4();
     XMFLOAT4X4 mView = MathHelper::Identity4x4();
