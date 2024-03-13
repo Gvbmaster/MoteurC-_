@@ -5,7 +5,7 @@
 #include <crtdbg.h>
 #endif
 #include "GameTimer.h"
-#include "Renderer.h"
+#include "MeshManager.h"
 #include "UploadBuffer.h"
 
 using namespace DirectX;
