@@ -4,9 +4,9 @@
 
 class ComponentScript : public Component {
 public:
-    ComponentScript(GameObject* gameObject) : Component(gameObject) {}
-    virtual ~ComponentScript() {}
+    ComponentScript(GameObject* gameObject);
+    virtual ~ComponentScript();
 
-    virtual void init() {}
-    virtual void update(float deltaTime) {}
+    virtual void init();
+    virtual void update(float deltaTime);
 };

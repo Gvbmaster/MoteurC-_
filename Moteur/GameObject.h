@@ -3,7 +3,9 @@
 #include <vector>
 #include <iostream>
 #include "Transform.h"
-#include "Component.h"
+//#include "Component.h"
+
+class Component;
 
 class GameObject {
 public:

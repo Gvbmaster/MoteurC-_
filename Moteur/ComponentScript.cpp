@@ -2,8 +2,10 @@
 #include "ComponentScript.h"
 
 
-ComponentScript::ComponentScript(GameObject* gameObject) : Component(gameObject) {}
-ComponentScript::~ComponentScript() {}
+ComponentScript::ComponentScript(GameObject* gameObject) : Component(gameObject) {
+}
+ComponentScript::~ComponentScript() {
+}
 
 
 void ComponentScript::init() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "d3dUtil.h"
+#include "Utils.h"
 
 template<typename T>
 class UploadBuffer
@@ -19,12 +19,13 @@ public:
         // UINT   SizeInBytes;   // multiple of 256
         // } D3D12_CONSTANT_BUFFER_VIEW_DESC;
         if(isConstantBuffer)
-            mElementByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(T));
-
+            mElementByteSize = Utils::CalcConstantBufferByteSize(sizeof(T));
+        CD3DX12_HEAP_PROPERTIES heapProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+        CD3DX12_RESOURCE_DESC ressourceDesc = CD3DX12_RESOURCE_DESC::Buffer(mElementByteSize * elementCount);
         ThrowIfFailed(device->CreateCommittedResource(
-            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+            &heapProperty,
             D3D12_HEAP_FLAG_NONE,
-            &CD3DX12_RESOURCE_DESC::Buffer(mElementByteSize*elementCount),
+            &ressourceDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS(&mUploadBuffer)));

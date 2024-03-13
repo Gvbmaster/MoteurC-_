@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "GameObject.h"
+#include "Component.h"
 
 GameObject::GameObject()
 {
@@ -28,17 +30,15 @@ void GameObject::addComponent(Component* component)
     m_components.push_back(component);
 }
 
-Component* GameObject::getComponent(ComponentType type) {
-    for (auto& component : m_components) {
-        if (component->getType() == type) {
+Component* GameObject::getComponent(ComponentType type) 
+{
+	for (auto& component : m_components) {
+		if (component->getType() == type) {
 			return component;
 		}
-    }
-    std::cout << "Le composant n'a pas été trouvé!" << std::endl;
-    return nullptr;
+	}
+	return nullptr;
 }
-
-
 
 void GameObject::update(float deltaTime) {
 	for (auto& component : m_components) {

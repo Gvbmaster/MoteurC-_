@@ -3,15 +3,17 @@
 //***************************************************************************************
 #include "pch.h"
 #include "framework.h"
-#include "Utils.h"
 
 #include "initApp.h"
+#include "Mesh.h"
+#include "MeshManager.h"
+#include "Camera.h"
 
 
 
 
 
-using Microsoft::WRL::ComPtr;
+
 using namespace std;
 using namespace DirectX;
 
@@ -35,6 +37,9 @@ InitApp::InitApp(HINSTANCE hInstance)
 	// Only one InitApp can be constructed.
 	assert(mApp == nullptr);
 	mApp = this;
+	mSwapChainBuffer[0] = nullptr;
+	mSwapChainBuffer[1] = nullptr;
+	mDepthStencilBuffer = nullptr;
 }
 
 InitApp::~InitApp()
@@ -80,7 +85,7 @@ void InitApp::Update(const GameTimer& gt)
 
 }
 
-void InitApp::Draw(const GameTimer& gt)
+void InitApp::Draw(const GameTimer& gt, std::vector<Mesh*> vMesh)
 {
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
@@ -88,7 +93,7 @@ void InitApp::Draw(const GameTimer& gt)
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc, nullptr));
 
 	// Indicate a state transition on the resource usage.
 	CD3DX12_RESOURCE_BARRIER barrierTransition = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -113,11 +118,29 @@ void InitApp::Draw(const GameTimer& gt)
 
 	mCommandList->OMSetRenderTargets(1, &backBufferView, true, &depthStencilView);
 
+
+	///
+	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap };
+	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	meshManager.DrawMeshes(mCommandList,mCbvHeap,mRootSignature,vMesh);
+
+
+	///
+
+
+	barrierTransition = CD3DX12_RESOURCE_BARRIER::Transition(
+		CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	mCommandList->ResourceBarrier(1, &barrierTransition);
+
 	// Done recording commands.
 	ThrowIfFailed(mCommandList->Close());
 
 	// Add the command list to the queue for execution.
-	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+	ID3D12CommandList* cmdsLists[] = { mCommandList };
 	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
 	// swap the back and front buffers
@@ -132,10 +155,30 @@ void InitApp::Draw(const GameTimer& gt)
 
 int InitApp::Run()
 {
+	int a = 0;
 	MSG msg = { 0 };
 
-	mTimer.Reset();
+	
 
+	mTimer.Reset();
+	Camera camera;
+	Mesh mesh;
+	ThrowIfFailed(mDirectCmdListAlloc->Reset());
+	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc, nullptr));
+
+	mesh.CreateCubeMesh(meshManager, mCommandList, md3dDevice);
+	meshManager.vMesh.push_back(&mesh);
+
+	ThrowIfFailed(mCommandList->Close());
+
+	ID3D12CommandList* cmdsLists[] = { mCommandList };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+
+	FlushCommandQueue();
+
+	
+	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshManager.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
+	meshManager.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice);
 	while (msg.message != WM_QUIT)
 	{
 		// If there are Window messages then process them.
@@ -153,13 +196,17 @@ int InitApp::Run()
 			{
 				CalculateFrameStats();
 				Update(mTimer);
-				Draw(mTimer);
+				Draw(mTimer,meshManager.vMesh);
+
+				//meshes.DrawMeshes(mCommandList, md3dDevice, &vertices, &indices);
 			}
 			else
 			{
 				Sleep(100);
 			}
 		}
+
+
 	}
 
 	return (int)msg.wParam;
@@ -186,8 +233,7 @@ void InitApp::CreateRtvAndDsvDescriptorHeaps()
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(
-		&rtvHeapDesc, IID_PPV_ARGS(mRtvHeap.GetAddressOf())));
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&mRtvHeap)));
 
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
@@ -195,8 +241,7 @@ void InitApp::CreateRtvAndDsvDescriptorHeaps()
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(
-		&dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&mDsvHeap)));
 }
 
 void InitApp::OnResize()
@@ -208,12 +253,19 @@ void InitApp::OnResize()
 	// Flush before changing any resources.
 	FlushCommandQueue();
 
-	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc, nullptr));
 
 	// Release the previous resources we will be recreating.
-	for (int i = 0; i < SwapChainBufferCount; ++i)
-		mSwapChainBuffer[i].Reset();
-	mDepthStencilBuffer.Reset();
+
+	for (int i = 0; i < SwapChainBufferCount; ++i) {
+
+		if (mSwapChainBuffer[i] ) {
+			mSwapChainBuffer[i]->Release();
+		}
+	}
+	if (mDepthStencilBuffer) {
+		mDepthStencilBuffer->Release();
+	}
 
 	// Resize the swap chain.
 	ThrowIfFailed(mSwapChain->ResizeBuffers(
@@ -228,7 +280,7 @@ void InitApp::OnResize()
 	for (UINT i = 0; i < SwapChainBufferCount; i++)
 	{
 		ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(&mSwapChainBuffer[i])));
-		md3dDevice->CreateRenderTargetView(mSwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
+		md3dDevice->CreateRenderTargetView(mSwapChainBuffer[i], nullptr, rtvHeapHandle);
 		rtvHeapHandle.Offset(1, mRtvDescriptorSize);
 	}
 
@@ -263,7 +315,7 @@ void InitApp::OnResize()
 		&depthStencilDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		&optClear,
-		IID_PPV_ARGS(mDepthStencilBuffer.GetAddressOf())));
+		IID_PPV_ARGS(&mDepthStencilBuffer)));
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
@@ -271,11 +323,11 @@ void InitApp::OnResize()
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Format = mDepthStencilFormat;
 	dsvDesc.Texture2D.MipSlice = 0;
-	md3dDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), &dsvDesc, DepthStencilView());
+	md3dDevice->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, DepthStencilView());
 
 	// Transition the resource from its initial state to be used as a depth buffer.
 	CD3DX12_RESOURCE_BARRIER transition = CD3DX12_RESOURCE_BARRIER::Transition(
-		mDepthStencilBuffer.Get(),
+		mDepthStencilBuffer,
 		D3D12_RESOURCE_STATE_COMMON,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE
 	);
@@ -283,7 +335,7 @@ void InitApp::OnResize()
 
 	// Execute the resize commands.
 	ThrowIfFailed(mCommandList->Close());
-	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+	ID3D12CommandList* cmdsLists[] = { mCommandList };
 	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
 	// Wait until resize is complete.
@@ -482,7 +534,7 @@ bool InitApp::InitDirect3D()
 #if defined(DEBUG) || defined(_DEBUG) 
 	// Enable the D3D12 debug layer.
 	{
-		ComPtr<ID3D12Debug> debugController;
+		ID3D12Debug* debugController;
 		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)));
 		debugController->EnableDebugLayer();
 	}
@@ -499,11 +551,11 @@ HRESULT hardwareResult = D3D12CreateDevice(
 // Fallback to WARP device.
 if (FAILED(hardwareResult))
 {
-	ComPtr<IDXGIAdapter> pWarpAdapter;
+	IDXGIAdapter* pWarpAdapter;
 	ThrowIfFailed(mdxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&pWarpAdapter)));
 
 	ThrowIfFailed(D3D12CreateDevice(
-		pWarpAdapter.Get(),
+		pWarpAdapter,
 		D3D_FEATURE_LEVEL_11_0,
 		IID_PPV_ARGS(&md3dDevice)));
 }
@@ -552,14 +604,14 @@ void InitApp::CreateCommandObjects()
 
 	ThrowIfFailed(md3dDevice->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		IID_PPV_ARGS(mDirectCmdListAlloc.GetAddressOf())));
+		IID_PPV_ARGS(&mDirectCmdListAlloc)));
 
 	ThrowIfFailed(md3dDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		mDirectCmdListAlloc.Get(), // Associated command allocator
+		mDirectCmdListAlloc, // Associated command allocator
 		nullptr,                   // Initial PipelineStateObject
-		IID_PPV_ARGS(mCommandList.GetAddressOf())));
+		IID_PPV_ARGS(&mCommandList)));
 
 	// Start off in a closed state.  This is because the first time we refer 
 	// to the command list we will Reset it, and it needs to be closed before
@@ -570,7 +622,10 @@ void InitApp::CreateCommandObjects()
 void InitApp::CreateSwapChain()
 {
 	// Release the previous swapchain we will be recreating.
-	mSwapChain.Reset();
+	if (mSwapChain != NULL) {
+
+		mSwapChain->Release();
+	}
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	sd.BufferDesc.Width = mClientWidth;
@@ -591,9 +646,9 @@ void InitApp::CreateSwapChain()
 
 	// Note: Swap chain uses queue to perform flush.
 	ThrowIfFailed(mdxgiFactory->CreateSwapChain(
-		mCommandQueue.Get(),
+		mCommandQueue,
 		&sd,
-		mSwapChain.GetAddressOf()));
+		&mSwapChain));
 }
 
 void InitApp::FlushCommandQueue()
@@ -604,7 +659,7 @@ void InitApp::FlushCommandQueue()
 	// Add an instruction to the command queue to set a new fence point.  Because we 
 	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
 	// processing all the commands prior to this Signal().
-	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mCurrentFence));
+	ThrowIfFailed(mCommandQueue->Signal(mFence, mCurrentFence));
 
 	// Wait until the GPU has completed commands up to this fence point.
 	if (mFence->GetCompletedValue() < mCurrentFence)
@@ -622,7 +677,7 @@ void InitApp::FlushCommandQueue()
 
 ID3D12Resource* InitApp::CurrentBackBuffer()const
 {
-	return mSwapChainBuffer[mCurrBackBuffer].Get();
+	return mSwapChainBuffer[mCurrBackBuffer];
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE InitApp::CurrentBackBufferView()const
@@ -743,4 +798,69 @@ void InitApp::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 
 		::OutputDebugString(text.c_str());
 	}
+}
+
+void InitApp::BuildRootSignature()
+{
+
+	// Root parameter can be a table, root descriptor or root constants.
+	CD3DX12_ROOT_PARAMETER slotRootParameter[1];
+
+	// Create a single descriptor table of CBVs.
+	CD3DX12_DESCRIPTOR_RANGE cbvTable;
+	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+	slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
+
+	// A root signature is an array of root parameters.
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameter, 0, nullptr,
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	// create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
+	ComPtr<ID3DBlob> serializedRootSig = nullptr;
+	ComPtr<ID3DBlob> errorBlob = nullptr;
+	HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+		serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf());
+
+	if (errorBlob != nullptr)
+	{
+		::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+	}
+	ThrowIfFailed(hr);
+
+	ThrowIfFailed(md3dDevice->CreateRootSignature(
+		0,
+		serializedRootSig->GetBufferPointer(),
+		serializedRootSig->GetBufferSize(),
+		IID_PPV_ARGS(&mRootSignature)));
+}
+
+void InitApp::BuildDescriptorHeaps()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+	cbvHeapDesc.NumDescriptors = 1;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
+		IID_PPV_ARGS(&mCbvHeap)));
+}
+
+void InitApp::BuildConstantBuffers()
+{
+	mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice, 1, true);
+
+	UINT objCBByteSize = Utils::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+	D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mObjectCB->Resource()->GetGPUVirtualAddress();
+	// Offset to the ith object constant buffer in the buffer.
+	int boxCBufIndex = 0;
+	cbAddress += boxCBufIndex * objCBByteSize;
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+	cbvDesc.BufferLocation = cbAddress;
+	cbvDesc.SizeInBytes = Utils::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+	md3dDevice->CreateConstantBufferView(
+		&cbvDesc,
+		mCbvHeap->GetCPUDescriptorHandleForHeapStart());
 }
