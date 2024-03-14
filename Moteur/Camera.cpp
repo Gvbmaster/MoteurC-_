@@ -1,26 +1,82 @@
 #include "pch.h"
+#include "framework.h"
 #include "Camera.h"
+#include "GameObject.h"
 
-Camera::Camera(float fovY, float aspectRatio, float nearZ, float farZ) : Component(nullptr) {
-    DirectX::XMStoreFloat4x4(&m_ViewMatrix, DirectX::XMMatrixIdentity());
-    setProjectionMatrix(fovY, aspectRatio, nearZ, farZ);
+Camera::Camera()
+{
 }
 
-Camera::~Camera() {
+Camera::~Camera()
+{
+}
+
+void Camera::Init(GameObject* gameObject, float fovY, float aspectRatio, float nearZ, float farZ)
+{
+	m_gameObject = gameObject;
+	m_FovY = fovY;
+	m_AspectRatio = aspectRatio;
+	m_NearZ = nearZ;
+	m_FarZ = farZ;
+
+	Update(aspectRatio);
+}
+
+void Camera::Update(float aspectRatio)
+{
+    Transform* transform = getTransform();
+
+    if (transform != nullptr) {
+        XMVECTOR position = XMLoadFloat3(&transform->vPos);
+        XMVECTOR lookAt = position + XMLoadFloat3(&transform->vDir);
+        XMVECTOR up = XMLoadFloat3(&transform->vUp);
+
+        XMMATRIX viewMatrix = XMMatrixLookAtLH(position, lookAt, up);
+        XMStoreFloat4x4(&m_ViewMatrix, viewMatrix);
+
+        XMMATRIX projectionMatrix = XMMatrixPerspectiveFovLH(m_FovY, aspectRatio, m_NearZ, m_FarZ);
+        XMStoreFloat4x4(&m_ProjectionMatrix, projectionMatrix);
+    }
 }
 
 void Camera::setProjectionMatrix(float fovY, float aspectRatio, float nearZ, float farZ) {
-    DirectX::XMStoreFloat4x4(&m_ProjectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fovY, aspectRatio, nearZ, farZ));
+    m_FovY = fovY;
+    m_AspectRatio = aspectRatio;
+    m_NearZ = nearZ;
+    m_FarZ = farZ;
+
+    XMMATRIX projectionMatrix = XMMatrixPerspectiveFovLH(m_FovY, m_AspectRatio, m_NearZ, m_FarZ);
+    XMStoreFloat4x4(&m_ProjectionMatrix, projectionMatrix);
 }
 
-const DirectX::XMFLOAT4X4& Camera::getViewMatrix() const {
+
+const XMFLOAT4X4& Camera::getViewMatrix()
+{
     return m_ViewMatrix;
 }
 
-const DirectX::XMFLOAT4X4& Camera::getProjectionMatrix() const {
+const XMFLOAT4X4& Camera::getProjectionMatrix()
+{
     return m_ProjectionMatrix;
 }
 
-void Camera::update(float deltaTime) {
-    Component::update(deltaTime);
+const XMFLOAT4X4& Camera::getWorldMatrix()
+{
+	Transform* transform = getTransform();
+    if (transform != nullptr) {
+		return transform->matrix;
+	}
+    else {
+		return m_ProjectionMatrix;
+	}
+}
+
+ComponentType Camera::getType() const
+{
+	return ComponentType::Camera;
+}
+
+Transform* Camera::getTransform()
+{
+	return dynamic_cast<Transform*>(m_gameObject->getComponent(ComponentType::Transform));
 }

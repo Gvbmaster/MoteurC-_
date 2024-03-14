@@ -15,6 +15,38 @@ struct ObjectConstants
     XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
 };
 
+struct CameraConstantBuffer
+{
+    XMFLOAT4X4 View;
+    XMFLOAT4X4 Proj;
+    XMFLOAT4X4 ViewProj;
+    XMFLOAT4X4 InvView;
+    XMFLOAT4X4 InvProj;
+    XMFLOAT4X4 InvViewProj;
+
+    XMFLOAT3 EyePosW;
+    float NearZ;
+    float FarZ;
+
+    float TotalTime;
+    float DeltaTime;
+
+    float aspectRatio;
+
+    float FogStart;
+    float FogRange;
+    XMFLOAT4 FogColor;
+
+    struct Light
+    {
+        XMFLOAT3 Direction;
+        XMFLOAT3 Strength;
+    };
+
+    Light Lights[2];
+};
+
+
 
 class InitApp
 {
@@ -46,6 +78,7 @@ public:
     void BuildRootSignature();
     void BuildDescriptorHeaps();
     void BuildConstantBuffers();
+    void SetCameraMatrices(XMFLOAT4X4 view, XMFLOAT4X4 proj);
 
     ID3D12Device* GetDevice() { return md3dDevice; };
     ID3D12GraphicsCommandList* GetCommandList() { return mCommandList; };
@@ -144,11 +177,12 @@ protected:
     UINT mCbvSrvUavDescriptorSize = 0;
 
     // Derived class should set these in derived constructor to customize starting values.
-    std::wstring mMainWndCaption = L"d3d App";
+    std::wstring mMainWndCaption = L"Notre Jeu";
     D3D_DRIVER_TYPE md3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
     DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
     DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    int mClientWidth = 800;
-    int mClientHeight = 600;
+    CameraConstantBuffer mCameraCB;
+    int mClientWidth = 1280;
+    int mClientHeight = 720;
 };
 

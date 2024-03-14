@@ -29,6 +29,9 @@ struct Vertex2
 class MeshManager{
 
 public:
+	MeshManager();
+	~MeshManager();
+
 	ID3D12PipelineState* mPso = nullptr;
 	std::vector<Mesh*> vMesh;
 	std::vector<ID3D12GraphicsCommandList*> vMeshCommandList;
@@ -40,7 +43,5 @@ public:
 	void BuildPSO(std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout, ID3D12RootSignature* mRootSignature, ID3DBlob* mvsByteCode, ID3DBlob* mpsByteCode, DXGI_FORMAT mBackBufferFormat, bool m4xMsaaState, UINT m4xMsaaQuality, DXGI_FORMAT mDepthStencilFormat, ID3D12Device* md3dDevice);
 
 
-	MeshManager();
-	~MeshManager() {}
 
 };

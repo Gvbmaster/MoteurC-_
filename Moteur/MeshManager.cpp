@@ -20,8 +20,13 @@ std::vector<D3D12_INPUT_ELEMENT_DESC> MeshManager::BuildShadersAndInputLayout(ID
 
 MeshManager::MeshManager()
 {
-}
 
+} 
+
+MeshManager::~MeshManager()
+{
+
+}
 
 void MeshManager::DrawMeshes(ID3D12GraphicsCommandList* mCommandList, ID3D12DescriptorHeap* mCbvHeap, ID3D12RootSignature* mRootSignature, std::vector<Mesh*> vMesh) {
 

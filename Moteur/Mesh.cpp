@@ -101,8 +101,6 @@ void Mesh::CreateCubeMesh(MeshManager meshManager, ID3D12GraphicsCommandList* mC
 	vbv.SizeInBytes = 8 * sizeof(Vertex1);
 	meshManager.vMeshCommandList.push_back(mCommandList);
 
-
-
 }
 
 D3D12_VERTEX_BUFFER_VIEW Mesh::GetVertexBuffers() {

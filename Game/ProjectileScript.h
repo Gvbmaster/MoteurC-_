@@ -3,10 +3,10 @@
 
 class ProjectileScript : public ComponentScript {
 public:
-    ProjectileScript(GameObject* gameObject);
+    ProjectileScript();
     virtual ~ProjectileScript();
 
-    void init() override;
+    void init(GameObject* gameObject) override;
     void update(float deltaTime) override;
     // Autres méthodes spécifiques aux projectiles
 };

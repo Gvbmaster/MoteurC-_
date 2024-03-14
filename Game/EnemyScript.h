@@ -3,10 +3,10 @@
 
 class EnemyScript : public ComponentScript {
 public:
-    EnemyScript(GameObject* gameObject);
+    EnemyScript();
     virtual ~EnemyScript();
 
-    void init() override;
+    void init(GameObject* gameObject) override;
     void update(float deltaTime) override;
     // Autres méthodes spécifiques aux ennemis
 };

@@ -3,13 +3,14 @@
 #include "GameObject.h"
 
 
-Component::Component(GameObject* gameObject) : m_gameObject(gameObject) {
+Component::Component() {
 }
 
 Component::~Component() {
 }
 
-void Component::init() {
+void Component::init(GameObject* gameObject) {
+	m_gameObject = gameObject;
 }
 
 void Component::update(float detalTime) {

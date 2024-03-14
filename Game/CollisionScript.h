@@ -3,9 +3,10 @@
 
 class CollisionScript : public ComponentScript {
 public:
-    CollisionScript(GameObject* gameObject) : ComponentScript(gameObject) {}
-	virtual ~CollisionScript() {}
+    CollisionScript();
+    virtual ~CollisionScript();
 
+    void init(GameObject* gameObject) override;
     virtual void handleCollision(GameObject* otherObject) = 0;
 
     void update(float deltaTime) override;

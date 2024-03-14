@@ -39,14 +39,13 @@ Component* GameObject::getComponent(ComponentType type) {
     return nullptr;
 }
 
+Transform& GameObject::getTransform()
+{
+	return m_transform;
+}
+
 void GameObject::update(float deltaTime) {
 	for (auto& component : m_components) {
 		component->update(deltaTime);
 	}
 }
-
-//void GameObject::draw(Renderer& renderer) {
-//	for (auto& component : m_Components) {
-//		component->draw(renderer);
-//	}
-//}

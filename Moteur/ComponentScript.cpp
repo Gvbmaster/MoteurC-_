@@ -2,16 +2,16 @@
 #include "ComponentScript.h"
 
 
-ComponentScript::ComponentScript(GameObject* gameObject) : Component(gameObject) {
+ComponentScript::ComponentScript() {
 }
 ComponentScript::~ComponentScript() {
 }
 
 
-void ComponentScript::init() {
-
+void ComponentScript::init(GameObject* gameObject) {
+	Component::init(gameObject);
 }
 
 void ComponentScript::update(float deltaTime) {
-
+	Component::update(deltaTime);
 }

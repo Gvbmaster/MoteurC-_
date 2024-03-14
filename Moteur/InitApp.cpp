@@ -85,8 +85,7 @@ void InitApp::Update(const GameTimer& gt)
 
 }
 
-void InitApp::Draw(const GameTimer& gt, std::vector<Mesh*> vMesh)
-{
+void InitApp::Draw(const GameTimer& gt, std::vector<Mesh*> vMesh) {
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
 	ThrowIfFailed(mDirectCmdListAlloc->Reset());
@@ -118,16 +117,12 @@ void InitApp::Draw(const GameTimer& gt, std::vector<Mesh*> vMesh)
 
 	mCommandList->OMSetRenderTargets(1, &backBufferView, true, &depthStencilView);
 
-
-	///
+	// Draw meshes
 	ID3D12DescriptorHeap* descriptorHeaps[] = { mCbvHeap };
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	meshManager.DrawMeshes(mCommandList,mCbvHeap,mRootSignature,vMesh);
+	meshManager.DrawMeshes(mCommandList, mCbvHeap, mRootSignature, vMesh);
 
-
-	///
-
-
+	// Finish rendering setup
 	barrierTransition = CD3DX12_RESOURCE_BARRIER::Transition(
 		CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
@@ -143,15 +138,14 @@ void InitApp::Draw(const GameTimer& gt, std::vector<Mesh*> vMesh)
 	ID3D12CommandList* cmdsLists[] = { mCommandList };
 	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
-	// swap the back and front buffers
+	// Swap the back and front buffers
 	ThrowIfFailed(mSwapChain->Present(0, 0));
 	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
 
-	// Wait until frame commands are complete.  This waiting is inefficient and is
-	// done for simplicity.  Later we will show how to organize our rendering code
-	// so we do not have to wait per frame.
+	// Wait until frame commands are complete.
 	FlushCommandQueue();
 }
+
 
 int InitApp::Run()
 {
@@ -160,6 +154,9 @@ int InitApp::Run()
 
 	mTimer.Reset();
 	Mesh mesh;
+	Camera camera ;
+	camera.setProjectionMatrix(0.25f * XM_PI, AspectRatio(), 1.0f, 1000.0f);
+
 	ThrowIfFailed(mDirectCmdListAlloc->Reset());
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc, nullptr));
 
@@ -175,10 +172,6 @@ int InitApp::Run()
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshManager.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
 	meshManager.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice);
-
-	// Création de la caméra
-	Camera camera;
-	camera.setProjectionMatrix(0.25f * XM_PI, AspectRatio(), 1.0f, 1000.0f);
 
 	// Main message loop
 	while (msg.message != WM_QUIT)
@@ -202,7 +195,6 @@ int InitApp::Run()
 				CalculateFrameStats();
 				Update(mTimer);
 
-				// Passer les matrices de vue et de projection de la caméra au shader
 				SetCameraMatrices(camera.getViewMatrix(), camera.getProjectionMatrix());
 
 				Draw(mTimer, meshManager.vMesh);
@@ -869,4 +861,45 @@ void InitApp::BuildConstantBuffers()
 	md3dDevice->CreateConstantBufferView(
 		&cbvDesc,
 		mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+}
+
+void InitApp::SetCameraMatrices(XMFLOAT4X4 view, XMFLOAT4X4 proj)
+{
+	XMMATRIX viewMat = XMLoadFloat4x4(&view);
+	XMMATRIX projMat = XMLoadFloat4x4(&proj);
+
+	XMMATRIX viewProj = XMMatrixMultiply(viewMat, projMat);
+	XMVECTOR viewMatDet = XMMatrixDeterminant(viewMat);
+	XMMATRIX invView = XMMatrixInverse(&viewMatDet, viewMat);
+	XMVECTOR projMatDet = XMMatrixDeterminant(projMat);
+	XMMATRIX invProj = XMMatrixInverse(&projMatDet, projMat);
+	XMVECTOR viewProjDet = XMMatrixDeterminant(viewProj);
+	XMMATRIX invViewProj = XMMatrixInverse(&viewProjDet, viewProj);
+
+	XMStoreFloat4x4(&mCameraCB.View, XMMatrixTranspose(viewMat));
+	XMStoreFloat4x4(&mCameraCB.Proj, XMMatrixTranspose(projMat));
+	XMStoreFloat4x4(&mCameraCB.ViewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&mCameraCB.InvView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&mCameraCB.InvProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&mCameraCB.InvViewProj, XMMatrixTranspose(invViewProj));
+
+	mCameraCB.EyePosW = XMFLOAT3(0.0f, 0.0f, -10.0f);
+
+	mCameraCB.NearZ = 1.0f;
+	mCameraCB.FarZ = 1000.0f;
+
+	mCameraCB.TotalTime = mTimer.TotalTime();
+	mCameraCB.DeltaTime = mTimer.DeltaTime();
+
+	mCameraCB.aspectRatio = AspectRatio();
+
+	mCameraCB.FogStart = 5.0f;
+	mCameraCB.FogRange = 150.0f;
+	mCameraCB.FogColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+
+	mCameraCB.Lights[0].Direction = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+	mCameraCB.Lights[0].Strength = XMFLOAT3(0.9f, 0.9f, 0.9f);
+
+	mCameraCB.Lights[1].Direction = XMFLOAT3(-0.57735f, -0.57735f, 0.57735f);
+	mCameraCB.Lights[1].Strength = XMFLOAT3(0.5f, 0.5f, 0.5f);
 }

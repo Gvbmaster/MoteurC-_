@@ -3,10 +3,10 @@
 
 class PlayerScript : public ComponentScript {
 public:
-    PlayerScript(GameObject* gameObject);
+    PlayerScript();
     virtual ~PlayerScript();
 
-    void init() override;
+    void init(GameObject* gameObject) override;
     void update(float deltaTime) override;
     // Autres méthodes spécifiques au joueur
 };

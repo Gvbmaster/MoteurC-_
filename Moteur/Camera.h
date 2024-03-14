@@ -1,22 +1,34 @@
 #pragma once
 
-#include "Utils.h"
 #include "Component.h"
+#include "Transform.h"
+#include <DirectXMath.h>
+
+using namespace DirectX;
 
 class Camera : public Component {
 public:
-    Camera(float fovY, float aspectRatio, float nearZ, float farZ);
+    Camera();
     ~Camera();
 
-    ComponentType getType() const override { return ComponentType::Camera; }
+    void Init(GameObject* gameObject, float fovY, float aspectRatio, float nearZ, float farZ);
+    void Update(float aspectRatio);
     void setProjectionMatrix(float fovY, float aspectRatio, float nearZ, float farZ);
 
-    const DirectX::XMFLOAT4X4& getViewMatrix() const;
-    const DirectX::XMFLOAT4X4& getProjectionMatrix() const;
-    virtual void update(float deltaTime) override;
+    const XMFLOAT4X4& getViewMatrix();
+    const XMFLOAT4X4& getProjectionMatrix();
+    const XMFLOAT4X4& getWorldMatrix();
+
+    ComponentType getType() const override;
+    Transform* getTransform() override;
 
 private:
-    DirectX::XMFLOAT4X4 m_ViewMatrix;
-    DirectX::XMFLOAT4X4 m_ProjectionMatrix;
+    float m_FovY;
+    float m_NearZ;
+    float m_FarZ;
+    float m_AspectRatio;
+
+    XMFLOAT4X4 m_ViewMatrix;
+    XMFLOAT4X4 m_ProjectionMatrix;
 };
 

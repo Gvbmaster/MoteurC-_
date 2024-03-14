@@ -16,9 +16,8 @@ public:
 
     void addComponent(Component* component);
     void update(float deltaTime);
-    // void draw(Renderer& renderer);
-    Transform& getTransform() { return m_transform; }
     Component* getComponent(ComponentType type);
+    Transform& getTransform();
 
 
 private:
