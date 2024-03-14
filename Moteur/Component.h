@@ -1,15 +1,10 @@
 #pragma once
 
-//#include "GameObject.h"
-
 class GameObject;
 struct Transform;
 
 enum class ComponentType {
-	Camera,
-    Renderer,
-    Light,
-    Script,
+    Camera,
 };
 
 class Component {
@@ -19,9 +14,10 @@ public:
 
     virtual void init();
     virtual void update(float deltaTime);
+    // virtual void draw(Renderer& renderer);
     virtual ComponentType getType() const = 0;
-    ComponentType m_type;
+    virtual Transform* getTransform() = 0;
+
 protected:
     GameObject* m_gameObject;
-    Transform* getTransform();
 };

@@ -30,14 +30,13 @@ void GameObject::addComponent(Component* component)
     m_components.push_back(component);
 }
 
-Component* GameObject::getComponent(ComponentType type) 
-{
-	for (auto& component : m_components) {
-		if (component->getType() == type) {
-			return component;
-		}
-	}
-	return nullptr;
+Component* GameObject::getComponent(ComponentType type) {
+    for (Component* component : m_components) {
+        if (component->getType() == type) {
+            return component;
+        }
+    }
+    return nullptr;
 }
 
 void GameObject::update(float deltaTime) {

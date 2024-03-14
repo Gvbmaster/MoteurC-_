@@ -158,10 +158,7 @@ int InitApp::Run()
 	int a = 0;
 	MSG msg = { 0 };
 
-	
-
 	mTimer.Reset();
-	Camera camera;
 	Mesh mesh;
 	ThrowIfFailed(mDirectCmdListAlloc->Reset());
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc, nullptr));
@@ -176,9 +173,14 @@ int InitApp::Run()
 
 	FlushCommandQueue();
 
-	
 	std::vector<D3D12_INPUT_ELEMENT_DESC> descs = meshManager.BuildShadersAndInputLayout(&mvsByteCode, &mpsByteCode);
 	meshManager.BuildPSO(descs, mRootSignature, mvsByteCode, mpsByteCode, mBackBufferFormat, m4xMsaaState, m4xMsaaQuality, mDepthStencilFormat, md3dDevice);
+
+	// Création de la caméra
+	Camera camera;
+	camera.setProjectionMatrix(0.25f * XM_PI, AspectRatio(), 1.0f, 1000.0f);
+
+	// Main message loop
 	while (msg.message != WM_QUIT)
 	{
 		// If there are Window messages then process them.
@@ -194,23 +196,27 @@ int InitApp::Run()
 
 			if (!mAppPaused)
 			{
+				// Mettre à jour la caméra
+				camera.update(mTimer.DeltaTime());
+
 				CalculateFrameStats();
 				Update(mTimer);
-				Draw(mTimer,meshManager.vMesh);
 
-				//meshes.DrawMeshes(mCommandList, md3dDevice, &vertices, &indices);
+				// Passer les matrices de vue et de projection de la caméra au shader
+				SetCameraMatrices(camera.getViewMatrix(), camera.getProjectionMatrix());
+
+				Draw(mTimer, meshManager.vMesh);
 			}
 			else
 			{
 				Sleep(100);
 			}
 		}
-
-
 	}
 
 	return (int)msg.wParam;
 }
+
 
 bool InitApp::Initialize()
 {

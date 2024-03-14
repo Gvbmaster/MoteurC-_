@@ -1,12 +1,14 @@
 #pragma once
+
 #include "Utils.h"
 #include "Component.h"
 
 class Camera : public Component {
 public:
-    Camera();
+    Camera(float fovY, float aspectRatio, float nearZ, float farZ);
     ~Camera();
 
+    ComponentType getType() const override { return ComponentType::Camera; }
     void setProjectionMatrix(float fovY, float aspectRatio, float nearZ, float farZ);
 
     const DirectX::XMFLOAT4X4& getViewMatrix() const;
